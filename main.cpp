@@ -13,6 +13,19 @@ int main (int argc, const char **argv) {
 		DPI inspector(argv[1], "port 80 or port 443");
 		std::cout << "La interfaz a inspeccionar es: " <<  inspector.getInterfazCaptura() << std::endl;
 
+	for (unsigned short i = 1; i <= argc; ++i) {
+	   if (i != argc)
+	   parametro = argv[i];
+	   if ((parametro.compare("-c") == 0) or (parametro.compare("--config") == 0)) {
+	      config_file = argv[i+1];
+	   } else if ((parametro.compare("-s") == 0) or (parametro.compare("--sql") == 0)) {
+	      sql_sentence = argv[i+1];
+	   } else if ((parametro.compare("-h") == 0) or (parametro.compare("--help") == 0)) {
+	      std::cout << "Ayuda:\n\n\t-c, --config  <file>   insert DB configuration file.\n\t-s, --sql <sentence>   insert SQL sentence to execute.\n\n";
+	      return -1;
+	   }
+	}
+		
 	// Get database credentials from configuration file
 	std::string db_user_name, db_password, db_conn_str;
 	std::ifstream configs (config_file, std::ifstream::in);
