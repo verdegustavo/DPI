@@ -169,7 +169,7 @@ void DPI::parsePaquete(vector<Enlace*> *vecEnl, DBconnector *conector) {
 
             		stringstream convert;
                     string sqlString;
-                    convert << "INSERT INTO tb_enlaces (ip_origen,ip_destino,puerto_tcp_dst,cantidad_trafico,nombre_servidor,estatus) VALUES ('" << inet_ntoa(enlaceTemp->getIPorg());
+                    convert << "INSERT INTO tb_enlaces (create_date,ip_origen,ip_destino,puerto_tcp_dst,cantidad_trafico,nombre_servidor,estatus) VALUES (current_timestamp,'" << inet_ntoa(enlaceTemp->getIPorg());
                     convert << "','" << inet_ntoa(enlaceTemp->getIPfin()) << "'," << ntohs(enlaceTemp->getPuertoFin()) << "," << enlaceTemp->getTrafico() << ",'" << *(enlaceTemp->getServidor()) << "','" << *(enlaceTemp->getEstatus()) << "');"; // SELECT id FROM tb_enlaces ORDER BY 1 DESC LIMIT 1;";
                     sqlString = convert.str();
                     conector->ejecutarSQL(sqlString.c_str());
