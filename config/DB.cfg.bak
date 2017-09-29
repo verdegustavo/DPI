@@ -1,5 +1,5 @@
 username = dpiuser
 password = dpiuser
 database name = dpidb
-host addr = 127.0.0.1
+host addr = 172.16.18.2
 port = 5432

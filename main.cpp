@@ -41,15 +41,15 @@ int main (int argc, const char **argv) {
             std::string valor;
             valor = linea.substr(encontrado + 2);
             if (configurador.compare("username ") == 0) {
-        db_user_name = valor;
+                db_user_name = valor;
             } else if (configurador.compare("password ") == 0) {
-        db_password = valor;
+                db_password = valor;
             } else if (configurador.compare("database name ") == 0) {
-        db_name = valor;
+                db_name = valor;
             } else if (configurador.compare("host addr ") == 0) {
-        db_host = valor;
+                db_host = valor;
             } else if (configurador.compare("port ") == 0) {
-        db_port = valor;
+                db_port = valor;
             }
         }
 		
@@ -86,8 +86,6 @@ int main (int argc, const char **argv) {
 	else {
 		std::cout << std::endl << "¡El usuario ejecutor del programa debe ser root! (solo root puede capturar)" << std::endl << std::endl;
 		std::cout << "Ayuda:\n\n\t-c, --config  <file>   insert DB configuration file.\n\t-i, --interface <interface>   insert interface name to be monitored.\n\t-s, --stop <num of packets>  insert the number of packets to be analized.\n\n";
-//        std::cout << std::endl << "Modo de uso: ./dpi <interfaz de red> <# de paquetes a analizar>" << std::endl
-//                  << "    Ejemplo: ./dpi eth0 1000" << std::endl << std::endl;
 	}
 
 	return 0;
