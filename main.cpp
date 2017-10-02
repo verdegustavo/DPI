@@ -53,13 +53,20 @@ int main (int argc, const char **argv) {
             }
         }
 		
+		LogFile loggerMain("/home/gustavo/Desarrollo/DPI/v0.2/log/main.log");
+        stringstream write2log;
+		
         std::cout << "Conectando a la base de datos..." << std::endl;
+        write2log << "Conectando a la base de datos...";
+        loggerMain.escribirLog(0,&write2log);
 		std::vector<Enlace*> vEnlaces;
         std::string DBConnectionString = "user='" + db_user_name + "' password='" + db_password + "' dbname='" + db_name + "' hostaddr='" + db_host + "' port='" + db_port + "'";
 		DBconnector conDB(DBConnectionString.c_str());
 
         DPI inspector(interfaz.c_str(), "port 80 or port 443");
 		std::cout << "La interfaz a inspeccionar es: " <<  inspector.getInterfazCaptura() << std::endl;
+        write2log << "La interfaz a inspeccionar es: " <<  inspector.getInterfazCaptura();
+        loggerMain.escribirLog(0,&write2log);
         
         if (conDB.isConnected()) {
             std::cout << std::endl << "Comenzando a capturar paquetes..." << std::endl;
@@ -71,6 +78,8 @@ int main (int argc, const char **argv) {
             }
             else {
                 std::cout << "Hubo un problema comenzando la captura." << std::endl;
+                write2log << "Hubo un problema comenzando la captura.";
+                loggerMain.escribirLog(2,&write2log);
             }
 
             std::cout << std::endl << std::endl << std::endl << "La cantidad de enlaces guardados son: " << vEnlaces.size() << std::endl;
@@ -80,7 +89,11 @@ int main (int argc, const char **argv) {
             for (unsigned int i = 0; i < vEnlaces.size(); ++i)
                 delete vEnlaces[i];
             std::cout << "Memoria de enlaces limpia." << std::endl;
-
+            write2log << "Memoria de enlaces limpia.";
+            loggerMain.escribirLog(0,&write2log);
+        } else {
+            write2log << "Falló la conexión con la base de datos!";
+            loggerMain.escribirLog(2,&write2log);
         }
 	}
 	else {

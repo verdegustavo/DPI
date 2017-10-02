@@ -13,8 +13,12 @@ using namespace std;
 DPI::DPI(const char *interfaz, const char *filtro) {
 	interfazCap = (char *)interfaz;
 	filtroCap = (char *)filtro;
+    _logger = new LogFile("log/dpi.log");
+    stringstream write2log;
 	if (pcap_lookupnet(interfazCap, &net, &mask, error) == -1) {
 		cout << "No se pudo obtener la máscara de red para la interfaz " << interfazCap << endl;
+        _write2log << "No se pudo obtener la máscara de red para la interfaz " << interfazCap;
+        _logger->escribirLog(2,&_write2log);
 		mask = 0;
 	}
 }
@@ -30,10 +34,14 @@ bool DPI::comenzarCaptura() {
 
 	if (pcap_compile(descriptor, &fp, filtroCap, 0, net) == -1) {
 		cout << "Expresión inválida. No se puede analizar la expresión de filtro." << endl;
+        _write2log << "Expresión inválida. No se puede analizar la expresión de filtro.";
+        _logger->escribirLog(2,&_write2log);
 	}
 
 	if (pcap_setfilter(descriptor, &fp) == -1) {
 		cout << "No se pudo instalar el filtro." << endl;
+        _write2log << "No se pudo instalar el filtro.";
+        _logger->escribirLog(2,&_write2log);
 	}
 
 	return true;
@@ -70,7 +78,7 @@ void DPI::parsePaquete(vector<Enlace*> *vecEnl, DBconnector *conector) {
             if (encontrado1 < 1500) {
                 Enlace *enlaceTemp = new Enlace(&(cabecera_ip->ip_src), cabecera_tcp->th_sport, &(cabecera_ip->ip_dst), cabecera_tcp->th_dport, conector);
                 bool enlaceExiste = false;
-                u_int posicion;
+                u_int posicion = 0;
                 if (vecEnl->size() > 0) {
                     for (u_int i = 0; i < vecEnl->size(); ++i) {
                         enlaceExiste = vecEnl->at(i)->esIgual(enlaceTemp);
@@ -137,7 +145,7 @@ void DPI::parsePaquete(vector<Enlace*> *vecEnl, DBconnector *conector) {
                 server = server.substr(0,ntohs(ssl_payload_L->ssl_handshake_extensions_server_name_len));
                 Enlace *enlaceTemp = new Enlace(&(cabecera_ip->ip_src), cabecera_tcp->th_sport, &(cabecera_ip->ip_dst), cabecera_tcp->th_dport, conector);
                 bool enlaceExiste = false;
-                u_int posicion;
+                u_int posicion = 0;
                 if (vecEnl->size() > 0) {
                     for (u_int i = 0; i < vecEnl->size(); ++i) {
                         enlaceExiste = vecEnl->at(i)->esIgual(enlaceTemp);
