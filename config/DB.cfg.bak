@@ -1,0 +1,5 @@
+username = dpiuser
+password = dpiuser
+database name = dpidb
+host addr = 172.16.18.2
+port = 5432

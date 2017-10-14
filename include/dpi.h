@@ -7,18 +7,21 @@
 #include <vector>
 #include <enlace.h>
 #include <dbConnector.h>
+#include <logfile.h>
 
 class DPI {
 private:
-	char *interfazCap = NULL;
-	char *filtroCap = NULL;
+	char* interfazCap = NULL;
+	char* filtroCap = NULL;
 	const u_char *paquete;
-	pcap_t *descriptor;
+	pcap_t* descriptor;
 	pcap_pkthdr cabecera;
 	char error[PCAP_ERRBUF_SIZE];
 	bpf_program fp;
 	bpf_u_int32 mask;
 	bpf_u_int32 net;
+    LogFile* _logger;
+    stringstream _write2log;
 
 
         /* Ethernet addresses are 6 bytes */
