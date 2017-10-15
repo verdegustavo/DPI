@@ -106,9 +106,14 @@ private:
             u_short ssl_handshake_extensions_length;
             u_short ssl_handshake_extension_type;
             u_short ssl_handshake_extension_len;
-            u_short ssl_handshake_extensions_server_name_list_len;
-            u_char ssl_handshake_extensions_server_name_type;
+            u_short ssl_handshake_extension_renegotiation_info_type;
+            u_short ssl_handshake_extension_renegotiation_info_length;
+            u_char ssl_handshake_extension_renegotiation_length;
+            u_short ssl_handshake_extensions_server_name;
             u_short ssl_handshake_extensions_server_name_len;
+            u_short ssl_handshake_extensions_server_name_ind_list_len;
+            u_char ssl_handshake_extensions_server_name_ind_type;
+            u_short ssl_handshake_extensions_server_name_ind_len;
         };
 #pragma pack()
 

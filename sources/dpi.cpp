@@ -137,32 +137,30 @@ void DPI::parsePaquete(vector<Enlace*> *vecEnl, DBconnector *conector) {
             ssl_handshake_comp_methods_length = (u_char *)(paquete + SIZE_ETHERNET + size_cabecera_ip + size_cabecera_tcp + 46 + ntohs(ssl_payload_H->ssl_handshake_cipher_suites_length));
 
             ssl_payload_L = (sniff_ssl_L*)(paquete + SIZE_ETHERNET + size_cabecera_ip + size_cabecera_tcp + 46 + ntohs(ssl_payload_H->ssl_handshake_cipher_suites_length) + 1 + *ssl_handshake_comp_methods_length);
+            
+            string server = "";
+            if (ssl_payload_H->ssl_record_contentType == 0x16 /*22*/ && ssl_payload_H->ssl_handshake_type == 0x01 && ssl_payload_L->ssl_handshake_extensions_server_name_ind_type == 0) {
+                const char *ssl_handshake_extensions_server_name = (char *)(paquete + SIZE_ETHERNET + size_cabecera_ip + size_cabecera_tcp + 46 + ntohs(ssl_payload_H->ssl_handshake_cipher_suites_length) + 1 + *ssl_handshake_comp_methods_length + 20);
+                string temporal(ssl_handshake_extensions_server_name);
+                
+                _write2log << "ssl_payload_H->ssl_record_contentType = " << (unsigned short)ssl_payload_H->ssl_record_contentType;
+                _logger->escribirLog(0,&_write2log);
+                
+                _write2log << "ssl_payload_H->ssl_handshake_type = " << (unsigned short)ssl_payload_H->ssl_handshake_type; 
+                _logger->escribirLog(0,&_write2log);
+                
+                _write2log << "ssl_payload_L->ssl_handshake_extensions_server_name_ind_type = " << (unsigned short)ssl_payload_L->ssl_handshake_extensions_server_name_ind_type; 
+                _logger->escribirLog(0,&_write2log);
+                
+                _write2log << "Temporal Server: " << temporal; 
+                _logger->escribirLog(0,&_write2log);
+                server = temporal;
 
-            const char *ssl_handshake_extensions_server_name = (char *)(paquete + SIZE_ETHERNET + size_cabecera_ip + size_cabecera_tcp + 46 + ntohs(ssl_payload_H->ssl_handshake_cipher_suites_length) + 1 + *ssl_handshake_comp_methods_length + 11);
-            string server(ssl_handshake_extensions_server_name);
-
-            if (ssl_payload_H->ssl_record_contentType == 0x16 && ssl_payload_H->ssl_handshake_type == 0x01 && ssl_payload_L->ssl_handshake_extension_type == 0 && !server.empty()) {
-                server = server.substr(0,ntohs(ssl_payload_L->ssl_handshake_extensions_server_name_len));
-                Enlace *enlaceTemp = new Enlace(&(cabecera_ip->ip_src), cabecera_tcp->th_sport, &(cabecera_ip->ip_dst), cabecera_tcp->th_dport, conector);
-                bool enlaceExiste = false;
-                u_int posicion = 0;
-                if (vecEnl->size() > 0) {
-                    for (u_int i = 0; i < vecEnl->size(); ++i) {
-                        enlaceExiste = vecEnl->at(i)->esIgual(enlaceTemp);
-                        if (enlaceExiste) {
-                            posicion = i;
-                            break;
-                        }
-                    }
-                }
-                if (enlaceExiste) {
-            //		cout << "Enlace duplicado! Borrando enlace...   ";
-                    delete enlaceTemp;
-            //		cout << "Enlace borrado." << endl;
-                }
-                else {
-                    vecEnl->push_back(enlaceTemp);
-
+                if (!server.empty()) {
+                    server = server.substr(0,ntohs(ssl_payload_L->ssl_handshake_extensions_server_name_len));
+                    Enlace *enlaceTemp = new Enlace(&(cabecera_ip->ip_src), cabecera_tcp->th_sport, &(cabecera_ip->ip_dst), cabecera_tcp->th_dport, conector);
+                    bool enlaceExiste = false;
+                    u_int posicion = 0;
                     if (vecEnl->size() > 0) {
                         for (u_int i = 0; i < vecEnl->size(); ++i) {
                             enlaceExiste = vecEnl->at(i)->esIgual(enlaceTemp);
@@ -172,30 +170,54 @@ void DPI::parsePaquete(vector<Enlace*> *vecEnl, DBconnector *conector) {
                             }
                         }
                     }
-                    vecEnl->at(posicion)->agregarTrafico(cabecera.len);
-                    vecEnl->at(posicion)->setServidor(server);
+                    if (enlaceExiste) {
+                //		cout << "Enlace duplicado! Borrando enlace...   ";
+                        delete enlaceTemp;
+                //		cout << "Enlace borrado." << endl;
+                    }
+                    else {
+                        vecEnl->push_back(enlaceTemp);
 
-            		stringstream convert;
-                    string sqlString;
-                    convert << "INSERT INTO tb_enlaces (create_date,ip_origen,ip_destino,puerto_tcp_dst,cantidad_trafico,nombre_servidor,estatus) VALUES (current_timestamp,'" << inet_ntoa(enlaceTemp->getIPorg());
-                    convert << "','" << inet_ntoa(enlaceTemp->getIPfin()) << "'," << ntohs(enlaceTemp->getPuertoFin()) << "," << enlaceTemp->getTrafico() << ",'" << *(enlaceTemp->getServidor()) << "','" << *(enlaceTemp->getEstatus()) << "');"; // SELECT id FROM tb_enlaces ORDER BY 1 DESC LIMIT 1;";
-                    sqlString = convert.str();
-                    conector->ejecutarSQL(sqlString.c_str());
-//                    enlaceTemp->setID(atoi(conector->getQuery(0,0)));
-
-
-                }
-                if (vecEnl->size() > 0) {
-                        for (u_int i = 0; i < vecEnl->size(); ++i) {
-                            enlaceExiste = vecEnl->at(i)->esIgual(enlaceTemp);
-                            if (enlaceExiste) {
-                                posicion = i;
-                                break;
+                        if (vecEnl->size() > 0) {
+                            for (u_int i = 0; i < vecEnl->size(); ++i) {
+                                enlaceExiste = vecEnl->at(i)->esIgual(enlaceTemp);
+                                if (enlaceExiste) {
+                                    posicion = i;
+                                    break;
+                                }
                             }
                         }
+                        vecEnl->at(posicion)->agregarTrafico(cabecera.len);
+                        vecEnl->at(posicion)->setServidor(server);
+
+                        stringstream convert;
+                        string sqlString;
+                        convert << "INSERT INTO tb_enlaces (create_date,ip_origen,ip_destino,puerto_tcp_dst,cantidad_trafico,nombre_servidor,estatus) VALUES (current_timestamp,'" << inet_ntoa(enlaceTemp->getIPorg());
+                        convert << "','" << inet_ntoa(enlaceTemp->getIPfin()) << "'," << ntohs(enlaceTemp->getPuertoFin()) << "," << enlaceTemp->getTrafico() << ",'" << *(enlaceTemp->getServidor()) << "','" << *(enlaceTemp->getEstatus()) << "');"; // SELECT id FROM tb_enlaces ORDER BY 1 DESC LIMIT 1;";
+                        sqlString = convert.str();
+                        conector->ejecutarSQL(sqlString.c_str());
+    //                    enlaceTemp->setID(atoi(conector->getQuery(0,0)));
+
+
                     }
-                vecEnl->at(posicion)->agregarTrafico(cabecera.len);
-                vecEnl->at(posicion)->setServidor(server);
+                    if (vecEnl->size() > 0) {
+                            for (u_int i = 0; i < vecEnl->size(); ++i) {
+                                enlaceExiste = vecEnl->at(i)->esIgual(enlaceTemp);
+                                if (enlaceExiste) {
+                                    posicion = i;
+                                    break;
+                                }
+                            }
+                        }
+                    vecEnl->at(posicion)->agregarTrafico(cabecera.len);
+                    vecEnl->at(posicion)->setServidor(server);
+                    vecEnl->at(posicion)->TCPflagAnalisis(cabecera_tcp->th_flags);
+//                    std::cout << "Estado del enlace: " << *vecEnl->at(posicion)->getEstatus() << std::endl;
+    //                 if (vecEnl->at(posicion)->getEstatus()->compare("Inactivo") == 0)
+    //                     std::cout << "Enlace Inactivo.";
+    //                 else
+    //                     std::cout << "Enlace Activo.";
+                }
             }
 		}
 	}

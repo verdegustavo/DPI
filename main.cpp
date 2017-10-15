@@ -73,7 +73,7 @@ int main (int argc, const char **argv) {
             if (inspector.comenzarCaptura()) {
                 for (int i = 0; i < atoi(stop.c_str()); ++i) {
                     inspector.parsePaquete(&vEnlaces, &conDB);
-                    std::cout << "\rAnalizados: " << i + 1;
+                    std::cout << "\rAnalizados: " << i + 1 << ". Enlaces en memoria: " << vEnlaces.size();
                 }
             }
             else {

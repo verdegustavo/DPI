@@ -107,8 +107,8 @@ void Enlace::mostrarEnlace() {
 	cout << "++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 	cout << inet_ntoa(ip_org) << /*":" << ntohs(puerto_TCP_org) <<*/ " <-> ";
 	cout << inet_ntoa(ip_fin) << ":" << ntohs(puerto_TCP_fin) << " = ";
-	cout << cantd_trafico << " bytes. Servidor: " << nombre_servidor << endl;
-//	     << "Estado del enlace: " << estatus << endl;
+	cout << cantd_trafico << " bytes. Servidor: " << nombre_servidor// << endl;
+	     << "Estado del enlace: " << estatus << endl;
 }
 
 void Enlace::setServidor(string &servidor) {
